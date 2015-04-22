@@ -54,6 +54,7 @@ public class XAJModel {
 	private double[] m_pEd; // 深层土壤蒸发量（毫米）
 
 	// PARAMETER 模型参数
+	/*
 	private double m_K; // 流域蒸散发能力与实测蒸散发值的比
 	private double m_IMP; // 不透水面积占全流域面积之比
 	private double m_B; // 蓄水容量曲线的方次，小流域（几平方公里）B为0.1左右，
@@ -68,6 +69,7 @@ public class XAJModel {
 	private double m_WMM; // 流域内最大蓄水容量
 	// private double m_Area; // 流域面积
 	// private int m_DeltaT; // 每一步长的小时数
+	 */
 
 	public static final int SA_MAX = 1; /* 1: 最大化问题,0: 最小化问题 */
 	public static final int SA_DIM = 10;
@@ -398,8 +400,8 @@ public class XAJModel {
 		double tmp2 = 0;
 		double y;
 
-		setParameters(params);
-		runNse();
+		//setParameters(params);
+		runNse(params);
 		runoff(runoff);
 
 		for (i = 365; i < NNN; i++) {
@@ -417,24 +419,26 @@ public class XAJModel {
 	}
 
 	private void setParameters(double[] params) {
-		this.m_K = params[0]; // (1) 流域蒸散发能力与实测水面蒸发之比
-		this.m_IMP = params[1]; // (2) 流域不透水面积占全流域面积之比
-		this.m_B = params[2]; // (3) 蓄水容量曲线的方次
-		this.m_Wum = params[3]; // (4) 上层蓄水容量
-		this.m_Wlm = params[4]; // (5) 下层蓄水容量
-		this.m_Wdm = params[5]; // (6) 深层蓄水容量
-		this.m_C = params[6]; // (7) 深层蒸散发系数
-		this.m_FC = params[7]; // (8) 稳定入渗率（毫米／小时）
-		this.m_KKG = params[8]; // (9) 地下径流消退系数
-		this.m_Kstor = params[9]; // (10)汇流计算参数
 
-		this.m_WM = this.m_Wum + this.m_Wlm + this.m_Wdm;
-		this.m_WMM = this.m_WM * (1.0 + this.m_B) / (1.0 - this.m_IMP);
 	}
 
-	private void runNse() {
+	private void runNse(double[] params) {
 		int i;
 
+		double m_K = params[0]; // (1) 流域蒸散发能力与实测水面蒸发之比
+		double m_IMP = params[1]; // (2) 流域不透水面积占全流域面积之比
+		double m_B = params[2]; // (3) 蓄水容量曲线的方次
+		double m_Wum = params[3]; // (4) 上层蓄水容量
+		double m_Wlm = params[4]; // (5) 下层蓄水容量
+		double m_Wdm = params[5]; // (6) 深层蓄水容量
+		double m_C = params[6]; // (7) 深层蒸散发系数
+		double m_FC = params[7]; // (8) 稳定入渗率（毫米／小时）
+		double m_KKG = params[8]; // (9) 地下径流消退系数
+		double m_Kstor = params[9]; // (10)汇流计算参数
+
+		double m_WM = m_Wum + m_Wlm + m_Wdm;
+		double m_WMM = m_WM * (1.0 + m_B) / (1.0 - m_IMP);
+		
 		// 模型的状态变量
 		double PE; // 大于零时为净雨量，小于零时为蒸发不足量，单位（毫米）
 
@@ -450,10 +454,10 @@ public class XAJModel {
 		double ED = 0.0; // 深层土壤蒸散发量（毫米）
 
 		// 假设流域经历了长时间降水，各层土壤含水量均为该层土壤的蓄水能力
-		double W = this.m_WM; // 流域内土壤湿度
-		double WU = this.m_Wum; // 流域内上层土壤湿度
-		double WL = this.m_Wlm; // 流域内下层土壤适度
-		double WD = this.m_Wdm; // 流域内深层土壤湿度
+		double W = m_WM; // 流域内土壤湿度
+		double WU = m_Wum; // 流域内上层土壤湿度
+		double WL = m_Wlm; // 流域内下层土壤适度
+		double WD = m_Wdm; // 流域内深层土壤湿度
 
 		for (i = 0; i < NNN; i++) {
 			PE = m_pP[i] - m_K * m_pEm[i];
@@ -516,7 +520,7 @@ public class XAJModel {
 				// m_B:蓄水容量曲线的方次(一个参数)
 				A = m_WMM * (1 - Math.pow((1.0 - W / m_WM), 1.0 / (1 + m_B)));
 				// 土壤湿度折算净雨量加上降水后蒸发剩余雨量小于流域内最大含水容量
-				if ((A + PE) < this.m_WMM) {
+				if ((A + PE) < m_WMM) {
 					// 流域内的产流深度计算
 					R = PE /* 降水蒸发后的剩余量(PE=P-E:状态变量) */
 							+ W /* 流域内土壤湿度 (W:状态变量) */
@@ -534,7 +538,7 @@ public class XAJModel {
 				// 如果降水经过蒸散发后的剩余量大于等于土壤稳定入渗率//
 				if (PE > m_FC) {
 					// 计算地下径流的产流深度
-					RG = (R - this.m_IMP * PE) * (m_FC / PE);
+					RG = (R - m_IMP * PE) * (m_FC / PE);
 					// 计算地表径流的产流深度
 					RS = R - RG;
 				}
@@ -608,10 +612,10 @@ public class XAJModel {
 			/* 11 */this.m_pR[i] = R;
 			// 当前步长的总产流径流深度
 		}
-		routing();
+		routing(m_Kstor, m_KKG);
 	}
 
-	private void routing() {
+	private void routing(double m_Kstor, double m_KKG) {
 	    double[] UH = new double[100]; // 单位线,假定最长的汇流时间为100天
 	    int N ;			// 汇流天数 
 	    N = 0;
@@ -619,7 +623,7 @@ public class XAJModel {
 	    double sum;
 	    int i, j;
 
-	    K = this.m_Kstor;
+	    K = m_Kstor;
 	    // 单位线推导
 	    for (i = 0; i < 100; i++)
 	      {
@@ -654,8 +658,8 @@ public class XAJModel {
 	    this.m_pQrg[0] = 0.0;
 	    for (i = 1; i < NNN; i++)
 	      {
-	        this.m_pQrg[i] = this.m_pQrg[i - 1] * this.m_KKG +
-	          this.m_pRg[i] * (1.0 - this.m_KKG) * this.m_U;
+	        this.m_pQrg[i] = this.m_pQrg[i - 1] * m_KKG +
+	          this.m_pRg[i] * (1.0 - m_KKG) * this.m_U;
 	      }
 	    for (i = 0; i < NNN; i++)
 	      {
