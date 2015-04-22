@@ -29,51 +29,13 @@ public class XAJModel {
 	private double[][] results;
 
 	// OUTPUT 输出数据
-	/*
-	private double[] m_pR; // 流域内每一步长的产流量(径流深度)
-	private double[] m_pRg; // 每一步长的地表径流深(毫米)
-	private double[] m_pRs; // 每一步长的基流径流深(毫米)
-	private double[] m_pE; // 每一步长的蒸发(毫米)
-	private double[] m_pQrs; // 流域出口地表径流量
-	private double[] m_pQrg; // 流域出口地下径流量
-	private double[] m_pQ; // 流域出口的总流量
-	*/
-	//
+
 	private double m_U; // for 24h. U=A(km^2)/3.6/delta_t
 	// SOIL 土壤数据
-	/*
-	private double[] m_pW; // 流域内土壤湿度
-	private double[] m_pWu; // 流域内上层土壤湿度
-	private double[] m_pWl; // 流域内下层土壤湿度
-	private double[] m_pWd; // 流域内深层土壤湿度
 
-	private double m_Wum; // 流域内上层土壤蓄水容量，植被良好的流域，约为20mm,差的流域,2~10mm
-	private double m_Wlm; // 流域内下层土壤蓄水容量，可取60~90mm
-	private double m_Wdm; // 流域内深层土壤蓄水容量，WDM=WM-WUM-WLM
-	 */	
 	// EVAPORATION 蒸发
-	/*
-	private double[] m_pEu; // 上层土壤蒸发量（毫米）
-	private double[] m_pEl; // 下层土壤蒸发量（毫米）
-	private double[] m_pEd; // 深层土壤蒸发量（毫米）
-	*/
-	// PARAMETER 模型参数
-	/*
-	private double m_K; // 流域蒸散发能力与实测蒸散发值的比
-	private double m_IMP; // 不透水面积占全流域面积之比
-	private double m_B; // 蓄水容量曲线的方次，小流域（几平方公里）B为0.1左右，
-	// 中等面积（300平方公里以内）0.2~0.3，较大面积0.3~0.4
-	private double m_WM; // 流域平均蓄水容量（毫米）(WM=WUM+WLM+WDM)
 
-	private double m_C; // 流域内深层土壤蒸发系数，江南湿润地区：0.15-0.2，华北半湿润地区：0.09-0.12
-	private double m_FC; // 稳定入渗率，毫米/小时
-	private double m_KKG; // 地下径流消退系数
-	// double m_UH; // 单元流域上地面径流的单位线
-	private double m_Kstor; // 脉冲汇流计算的参数,Liang
-	private double m_WMM; // 流域内最大蓄水容量
-	// private double m_Area; // 流域面积
-	// private int m_DeltaT; // 每一步长的小时数
-	 */
+	// PARAMETER 模型参数
 
 	public static final int SA_MAX = 1; /* 1: 最大化问题,0: 最小化问题 */
 	public static final int SA_DIM = 10;
@@ -386,9 +348,7 @@ public class XAJModel {
 		double tmp2 = 0;
 		double y;
 
-		//setParameters(params);
-		runNse(params);
-		//runoff(runoff);
+		runNse(params, this.m_U);
 
 		for (i = 365; i < NNN; i++) {
 			tmp += r[i];
@@ -404,11 +364,7 @@ public class XAJModel {
 		return (1000.0 * y);
 	}
 
-	private void setParameters(double[] params) {
-
-	}
-
-	private void runNse(double[] params) {
+	private void runNse(double[] params, double m_U) {
 		int i;
 
 		double m_K = params[0]; // (1) 流域蒸散发能力与实测水面蒸发之比
@@ -624,10 +580,10 @@ public class XAJModel {
 			m_pR[i] = R;
 			// 当前步长的总产流径流深度
 		}
-		routing(m_Kstor, m_KKG, m_pRs, m_pRg);
+		routing(m_Kstor, m_KKG, m_pRs, m_pRg, m_U);
 	}
 
-	private void routing(double m_Kstor, double m_KKG, double[] m_pRs, double[] m_pRg) {
+	private void routing(double m_Kstor, double m_KKG, double[] m_pRs, double[] m_pRg, double m_U) {
 	    double[] UH = new double[100]; // 单位线,假定最长的汇流时间为100天
 	    int N ;			// 汇流天数 
 	    N = 0;
@@ -668,7 +624,7 @@ public class XAJModel {
 	              {
 	                continue;
 	              }
-	            m_pQrs[i] += m_pRs[i - j] * UH[j] * this.m_U;
+	            m_pQrs[i] += m_pRs[i - j] * UH[j] * m_U;
 	          }
 	      }
 	    //地下水汇流计算
@@ -676,7 +632,7 @@ public class XAJModel {
 	    for (i = 1; i < NNN; i++)
 	      {
 	        m_pQrg[i] = m_pQrg[i - 1] * m_KKG +
-	          m_pRg[i] * (1.0 - m_KKG) * this.m_U;
+	          m_pRg[i] * (1.0 - m_KKG) * m_U;
 	      }
 	    for (i = 0; i < NNN; i++)
 	      {
@@ -688,18 +644,7 @@ public class XAJModel {
 	        runoff[i] = m_pQ[i];	
 	      }	    
 	}
-	/*
-	private void runoff(double[] runoff) {
-	    // 从1990年1月1日到1996年12月31日为模型的标定期，共有2557天，其总从
-	    // 1990年1月1日到1990年12月31日为模型运行的预热期，不参与标定 
-	    int i;
-	    
-	    for (i = 0; i < (NNN-1); i++)
-	      {
-	        runoff[i] = this.m_pQ[i];	
-	      }
-	}
-	*/
+
 	// 生成均值为0，标准差为T高斯分布扰动向量
 	void GaussianGenerate(double[] DeltaX, double T, double[] LowerX,
 			double[] UpperX) {
