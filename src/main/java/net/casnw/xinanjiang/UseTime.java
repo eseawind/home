@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package net.casnw.xinxnjiang;
+package net.casnw.xinanjiang;
 
 /**
  *

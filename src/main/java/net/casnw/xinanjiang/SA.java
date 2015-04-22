@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package net.casnw.xinxnjiang;
+package net.casnw.xinanjiang;
 
 import java.io.File;
 import net.casnw.home.io.DataWriter;
@@ -32,6 +32,7 @@ public class SA {
     public static final int NNN = 2557;    
 //    typedef double (*pObj)(double *X);
 
+    /*
     static long idum;	
     public static final int IA = 16807;
     public static final int IM = 2147483647;
@@ -40,6 +41,8 @@ public class SA {
     public static final int IR =2836;
     public static final int MASK= 123459876;
     int flag = 0;
+    */
+    java.util.Random m_r = null;
     
     double NSE(XinAnJiangModel xm, double[] r, double[] runoff, double[] params)
     {
@@ -68,6 +71,13 @@ public class SA {
     }
     
     /*产生0-1之间均匀分布的随机变量*/
+    double Rndu() {
+    	if (m_r == null) {
+    		m_r =new java.util.Random();
+    	}	
+    	return m_r.nextDouble();
+    }
+    /*
     double Rndu ()
     {
 //      int flag = 0;
@@ -104,6 +114,7 @@ public class SA {
 //      return (ans);
       return (ans);
     }
+    */
     /*产生高斯分布的随机变量*/
     double GasDev(double mean, double stdv)
     {
@@ -123,7 +134,7 @@ public class SA {
             {
                 iset=0;
             }
-            idum=idum0;
+            //idum=idum0;
             if(iset==0)
             {
                     do{

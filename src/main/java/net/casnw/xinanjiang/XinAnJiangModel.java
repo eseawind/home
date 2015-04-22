@@ -1,4 +1,4 @@
-package net.casnw.xinxnjiang;
+package net.casnw.xinanjiang;
 
 import java.io.BufferedReader;
 import java.io.File;
