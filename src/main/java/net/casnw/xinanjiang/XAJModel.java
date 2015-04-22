@@ -29,6 +29,7 @@ public class XAJModel {
 	private double[][] results;
 
 	// OUTPUT 输出数据
+	/*
 	private double[] m_pR; // 流域内每一步长的产流量(径流深度)
 	private double[] m_pRg; // 每一步长的地表径流深(毫米)
 	private double[] m_pRs; // 每一步长的基流径流深(毫米)
@@ -36,9 +37,11 @@ public class XAJModel {
 	private double[] m_pQrs; // 流域出口地表径流量
 	private double[] m_pQrg; // 流域出口地下径流量
 	private double[] m_pQ; // 流域出口的总流量
+	*/
 	//
 	private double m_U; // for 24h. U=A(km^2)/3.6/delta_t
 	// SOIL 土壤数据
+	/*
 	private double[] m_pW; // 流域内土壤湿度
 	private double[] m_pWu; // 流域内上层土壤湿度
 	private double[] m_pWl; // 流域内下层土壤湿度
@@ -47,12 +50,13 @@ public class XAJModel {
 	private double m_Wum; // 流域内上层土壤蓄水容量，植被良好的流域，约为20mm,差的流域,2~10mm
 	private double m_Wlm; // 流域内下层土壤蓄水容量，可取60~90mm
 	private double m_Wdm; // 流域内深层土壤蓄水容量，WDM=WM-WUM-WLM
-
+	 */	
 	// EVAPORATION 蒸发
+	/*
 	private double[] m_pEu; // 上层土壤蒸发量（毫米）
 	private double[] m_pEl; // 下层土壤蒸发量（毫米）
 	private double[] m_pEd; // 深层土壤蒸发量（毫米）
-
+	*/
 	// PARAMETER 模型参数
 	/*
 	private double m_K; // 流域蒸散发能力与实测蒸散发值的比
@@ -97,24 +101,6 @@ public class XAJModel {
 		this.m_pEm = new double[NNN];
 		// 观测径流数据
 		this.m_wall = new double[NNN];
-		// 模型输出，蒸散发项
-		this.m_pE = new double[NNN];
-		this.m_pEd = new double[NNN];
-		this.m_pEl = new double[NNN];
-		this.m_pEu = new double[NNN];
-		// 模型输出，出流项，经过汇流的产流
-		this.m_pQrg = new double[NNN];
-		this.m_pQrs = new double[NNN];
-		this.m_pQ = new double[NNN];
-		// 模型输出，产流项
-		this.m_pR = new double[NNN];
-		this.m_pRg = new double[NNN];
-		this.m_pRs = new double[NNN];
-		// 模型状态量，土壤湿度
-		this.m_pW = new double[NNN];
-		this.m_pWd = new double[NNN];
-		this.m_pWl = new double[NNN];
-		this.m_pWu = new double[NNN];
 	}
 
 	/**
@@ -402,7 +388,7 @@ public class XAJModel {
 
 		//setParameters(params);
 		runNse(params);
-		runoff(runoff);
+		//runoff(runoff);
 
 		for (i = 365; i < NNN; i++) {
 			tmp += r[i];
@@ -435,6 +421,21 @@ public class XAJModel {
 		double m_FC = params[7]; // (8) 稳定入渗率（毫米／小时）
 		double m_KKG = params[8]; // (9) 地下径流消退系数
 		double m_Kstor = params[9]; // (10)汇流计算参数
+		
+		// 模型输出，蒸散发项
+		double[] m_pE = new double[NNN];
+		double[] m_pEd = new double[NNN];
+		double[] m_pEl = new double[NNN];
+		double[] m_pEu = new double[NNN];
+		// 模型输出，产流项
+		double[] m_pR = new double[NNN];
+		double[] m_pRg = new double[NNN];
+		double[] m_pRs = new double[NNN];
+		// 模型状态量，土壤湿度
+		double[] m_pW = new double[NNN];
+		double[] m_pWd = new double[NNN];
+		double[] m_pWl = new double[NNN];
+		double[] m_pWu = new double[NNN];		
 
 		double m_WM = m_Wum + m_Wlm + m_Wdm;
 		double m_WMM = m_WM * (1.0 + m_B) / (1.0 - m_IMP);
@@ -589,39 +590,55 @@ public class XAJModel {
 			E = EU + EL + ED;
 			W = WU + WL + WD;
 			/* 以下部分是状态量：总蒸发量、上、下和深层土壤的蒸发的保存 */
-			/* 1 */this.m_pE[i] = E;
+			/* 1 */
+			m_pE[i] = E;
 			// 当前步长的蒸发 （模型重要输出）
-			/* 2 */this.m_pEu[i] = EU;
+			/* 2 */
+			m_pEu[i] = EU;
 			// 当前步长上层土壤蒸发
-			/* 3 */this.m_pEl[i] = EL;
+			/* 3 */
+			m_pEl[i] = EL;
 			// 当前步长下层土壤蒸发
-			/* 4 */this.m_pEd[i] = ED;
+			/* 4 */
+			m_pEd[i] = ED;
 			// 当前步长深层土壤蒸发
-			/* 5 */this.m_pW[i] = W;
+			/* 5 */
+			m_pW[i] = W;
 			// 当前步长流域平均土壤含水量
-			/* 6 */this.m_pWu[i] = WU;
+			/* 6 */
+			m_pWu[i] = WU;
 			// 当前步长流域上层土壤含水量
-			/* 7 */this.m_pWl[i] = WL;
+			/* 7 */
+			m_pWl[i] = WL;
 			// 当前步长流域下层土壤含水量
-			/* 8 */this.m_pWd[i] = WD;
+			/* 8 */
+			m_pWd[i] = WD;
 			// 当前步长流域深层土壤含水量
-			/* 9 */this.m_pRg[i] = RG;
+			/* 9 */
+			m_pRg[i] = RG;
 			// 当前步长流域基流径流深度
-			/* 10 */this.m_pRs[i] = RS;
+			/* 10 */
+			m_pRs[i] = RS;
 			// 当前步长流域地表径流径流深度
-			/* 11 */this.m_pR[i] = R;
+			/* 11 */
+			m_pR[i] = R;
 			// 当前步长的总产流径流深度
 		}
-		routing(m_Kstor, m_KKG);
+		routing(m_Kstor, m_KKG, m_pRs, m_pRg);
 	}
 
-	private void routing(double m_Kstor, double m_KKG) {
+	private void routing(double m_Kstor, double m_KKG, double[] m_pRs, double[] m_pRg) {
 	    double[] UH = new double[100]; // 单位线,假定最长的汇流时间为100天
 	    int N ;			// 汇流天数 
 	    N = 0;
 	    double K;			// 汇流参数
 	    double sum;
 	    int i, j;
+	    
+		// 模型输出，出流项，经过汇流的产流
+		double[] m_pQrg = new double[NNN];
+		double[] m_pQrs = new double[NNN];
+		double[] m_pQ = new double[NNN];	    
 
 	    K = m_Kstor;
 	    // 单位线推导
@@ -644,32 +661,37 @@ public class XAJModel {
 	    // 单位线汇流计算
 	    for (i = 0; i < NNN; i++)
 	      {
-	        this.m_pQrs[i] = 0.0;
+	        m_pQrs[i] = 0.0;
 	        for (j = 0; j <= N; j++)
 	          {
 	            if ((i - j) < 0)
 	              {
 	                continue;
 	              }
-	            this.m_pQrs[i] += this.m_pRs[i - j] * UH[j] * this.m_U;
+	            m_pQrs[i] += m_pRs[i - j] * UH[j] * this.m_U;
 	          }
 	      }
 	    //地下水汇流计算
-	    this.m_pQrg[0] = 0.0;
+	    m_pQrg[0] = 0.0;
 	    for (i = 1; i < NNN; i++)
 	      {
-	        this.m_pQrg[i] = this.m_pQrg[i - 1] * m_KKG +
-	          this.m_pRg[i] * (1.0 - m_KKG) * this.m_U;
+	        m_pQrg[i] = m_pQrg[i - 1] * m_KKG +
+	          m_pRg[i] * (1.0 - m_KKG) * this.m_U;
 	      }
 	    for (i = 0; i < NNN; i++)
 	      {
-	        this.m_pQ[i] = this.m_pQrs[i] + this.m_pQrg[i];
+	        m_pQ[i] = m_pQrs[i] + m_pQrg[i];
 	      }
+	    
+	    for (i = 0; i < (NNN-1); i++)
+	      {
+	        runoff[i] = m_pQ[i];	
+	      }	    
 	}
-
+	/*
 	private void runoff(double[] runoff) {
-	    /*从1990年1月1日到1996年12月31日为模型的标定期，共有2557天，其总从
-	     1990年1月1日到1990年12月31日为模型运行的预热期，不参与标定      */
+	    // 从1990年1月1日到1996年12月31日为模型的标定期，共有2557天，其总从
+	    // 1990年1月1日到1990年12月31日为模型运行的预热期，不参与标定 
 	    int i;
 	    
 	    for (i = 0; i < (NNN-1); i++)
@@ -677,8 +699,8 @@ public class XAJModel {
 	        runoff[i] = this.m_pQ[i];	
 	      }
 	}
-
-	/* 生成均值为0，标准差为T高斯分布扰动向量 */
+	*/
+	// 生成均值为0，标准差为T高斯分布扰动向量
 	void GaussianGenerate(double[] DeltaX, double T, double[] LowerX,
 			double[] UpperX) {
 		/* 这个发生函数的弊病很大，修改了 */
